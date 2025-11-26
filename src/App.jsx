@@ -8,6 +8,7 @@ import { fetchDishImage, fetchRecipeSuggestions, fetchFullRecipe } from './servi
 import Header from './components/Header';
 import AuthForms from './components/AuthForms';
 import RecipeView from './components/RecipeView';
+import AboutContact from './components/AboutContact';
 
 const App = () => {
   // --- APP STATE ---
@@ -699,6 +700,11 @@ const App = () => {
             )}
           </main>
         </>
+      )}
+      
+      {/* VIEW: ABOUT PAGE */}
+      {view === 'about' && (
+        <AboutContact setView={setView} />
       )}
 
       <style jsx global>{`
