@@ -44,12 +44,6 @@ const AboutContact = ({ setView }) => {
           <ArrowLeft className="w-4 h-4" /> Back
         </button>
 
-        <button 
-          onClick={toggleTheme}
-          className={`p-2 rounded-full transition-all duration-300 ${darkMode ? 'bg-slate-800 text-yellow-400 hover:bg-slate-700' : 'bg-orange-100 text-orange-600 hover:bg-orange-200'}`}
-        >
-          {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-        </button>
       </div>
 
       <div className="max-w-6xl mx-auto px-6 pt-24 pb-20">
@@ -60,11 +54,10 @@ const AboutContact = ({ setView }) => {
             <Code2 className="w-8 h-8 text-white" />
           </div>
           <h1 className="font-serif text-4xl md:text-6xl font-bold tracking-tight">
-            We are <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">Watchdogs</span>
+             About <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-red-600">UlamApp</span>
           </h1>
           <p className={`text-lg md:text-xl max-w-2xl mx-auto font-light leading-relaxed ${themeClasses.subText}`}>
-            Innovating culinary experiences through technology. 
-            Proudly representing <span className="font-semibold text-orange-500">Quezon City University</span>.
+             We are students from <span className="font-semibold text-orange-500">Quezon City University</span>, 2nd Year SFIT2B.
           </p>
 
           <div className="flex flex-wrap justify-center gap-4 mt-8">
@@ -86,31 +79,45 @@ const AboutContact = ({ setView }) => {
           <div className="space-y-8 animate-in slide-in-from-left duration-700">
             <div className={`p-8 rounded-[2rem] border shadow-xl ${themeClasses.card}`}>
               <h2 className="font-serif text-2xl font-bold mb-4 flex items-center gap-2">
-                <Globe className="w-5 h-5 text-orange-500" /> Our Mission
+                <Globe className="w-5 h-5 text-orange-500" /> Our Vision
               </h2>
               <p className={`leading-relaxed ${themeClasses.subText}`}>
                 To bridge the gap between traditional Filipino cooking and modern artificial intelligence. 
-                We believe in making home cooking accessible, efficient, and personalized for every Filipino household.
+                We believe in making home cooking accessible, efficient, and personalized for every Filipino household. 
+                -Stephen right?
               </p>
             </div>
 
             <div className={`p-8 rounded-[2rem] border shadow-xl ${themeClasses.card}`}>
+              <h2 className="font-serif text-2xl font-bold mb-4 flex items-center gap-2">
+                <Globe className="w-5 h-5 text-orange-500" /> Our Mission
+              </h2>
+              <p className={`leading-relaxed ${themeClasses.subText}`}>
+                To bridge the gap between traditional Filipino cooking and modern artificial intelligence. 
+                We believe in making home cooking accessible, efficient, and personalized for every Filipino household. 
+                -Stephen right?
+              </p>
+            </div>
+            
+            
+
+            <div className={`p-8 rounded-[2rem] border shadow-xl ${themeClasses.card}`}>
               <h2 className="font-serif text-2xl font-bold mb-6">Connect with Us</h2>
               <div className="space-y-4">
-                <a href="#" className={`flex items-center gap-4 p-4 rounded-xl transition-all ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-50'}`}>
+                <div className={`flex items-center gap-4 p-4 rounded-xl transition-all ${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
                   <div className="bg-slate-900 text-white p-2 rounded-lg"><Github className="w-5 h-5" /></div>
                   <div>
                     <h3 className="font-bold text-sm">GitHub</h3>
                     <p className={`text-xs ${themeClasses.subText}`}>Check our repositories</p>
                   </div>
-                </a>
-                <a href="#" className={`flex items-center gap-4 p-4 rounded-xl transition-all ${darkMode ? 'hover:bg-slate-700' : 'hover:bg-slate-50'}`}>
+                </div>
+                <div className={`flex items-center gap-4 p-4 rounded-xl transition-all ${darkMode ? 'bg-slate-700/50' : 'bg-slate-50'}`}>
                   <div className="bg-blue-700 text-white p-2 rounded-lg"><Code2 className="w-5 h-5" /></div>
                   <div>
                     <h3 className="font-bold text-sm">University Project</h3>
                     <p className={`text-xs ${themeClasses.subText}`}>SFIT-2B Block</p>
                   </div>
-                </a>
+                </div>
               </div>
             </div>
           </div>
@@ -120,7 +127,7 @@ const AboutContact = ({ setView }) => {
             <div className="absolute top-0 right-0 w-32 h-32 bg-orange-500 rounded-full blur-[80px] opacity-20 pointer-events-none"></div>
             
             <h2 className="font-serif text-3xl font-bold mb-2">Contact Us</h2>
-            <p className={`text-sm mb-8 ${themeClasses.subText}`}>Have a question or proposal? Send us a message.</p>
+            <p className={`text-sm mb-8 ${themeClasses.subText}`}>Have a question, suggestions or proposal? Send us a message.</p>
 
             <form onSubmit={handleSubmit} className="space-y-5">
               <div className="space-y-1">
@@ -132,7 +139,7 @@ const AboutContact = ({ setView }) => {
                     required
                     value={formData.name}
                     onChange={(e) => setFormData({...formData, name: e.target.value})}
-                    placeholder="Juan Dela Cruz"
+                    placeholder="Joshua Bogay"
                     className={`w-full pl-12 pr-4 py-3 rounded-xl border outline-none transition-all ${themeClasses.input}`}
                   />
                 </div>
@@ -147,7 +154,7 @@ const AboutContact = ({ setView }) => {
                     required
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
-                    placeholder="juan@qcu.edu.ph"
+                    placeholder="Jushua.Bogay@qcu.com.ph"
                     className={`w-full pl-12 pr-4 py-3 rounded-xl border outline-none transition-all ${themeClasses.input}`}
                   />
                 </div>
