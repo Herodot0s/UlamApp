@@ -42,10 +42,10 @@ const Header = ({
           {/* About Button */}
           <button 
             onClick={() => setView('about')}
-            className={`hidden sm:flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold transition-colors border ${view === 'recipe' ? 'bg-white/20 text-white border-white/30 hover:bg-white/30' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
+            className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-bold transition-colors border ${view === 'recipe' ? 'bg-white/20 text-white border-white/30 hover:bg-white/30' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`}
           >
             <Info className="w-3 h-3" />
-            About
+            <span className="hidden sm:inline">About</span>
           </button>
 
           {/* User Profile / Auth */}
