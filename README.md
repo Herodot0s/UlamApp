@@ -1,67 +1,66 @@
-🥘 UlamApp: AI-Powered Filipino Recipe Generator
-UlamApp is an intelligent kitchen companion designed to help you decide “Anong ulam?” (What’s for dinner?) by generating Filipino recipe suggestions based on the ingredients you already have in your pantry.
+# 🥘 UlamApp: AI-Powered Filipino Recipe Generator
 
-Built with React, Vite, and Tailwind CSS, and powered by Google Gemini AI, UlamApp takes the guesswork out of cooking by providing personalized recipe recommendations, complete with cooking instructions, nutritional info, and estimated costs.
+**UlamApp** is an intelligent kitchen companion designed to help you decide *“Anong ulam?”* (What’s for dinner?) by generating Filipino recipe suggestions based on the ingredients you already have in your pantry.
 
-🚀 Features
-🛒 Pantry-Based Suggestions: Input the ingredients you have (e.g., chicken, garlic, soy sauce), and the AI suggests dishes you can cook.
+Built with **React**, **Vite**, and **Tailwind CSS**, and powered by **Google Gemini AI**, UlamApp takes the guesswork out of cooking by providing personalized recipe recommendations, complete with cooking instructions, nutritional info, and estimated costs.
 
-🤖 AI Chef Integration: Uses Google Gemini to generate detailed recipes, including cooking steps, chef's notes, and nutritional values.
+## 🚀 Features
 
-🖼️ Visual Recipe Cards: Automatically fetches appetizing images for suggested dishes using a custom search API.
+  * **🛒 Pantry-Based Suggestions:** Input the ingredients you have (e.g., *chicken, garlic, soy sauce*), and the AI suggests dishes you can cook.
+  * **🤖 AI Chef Integration:** Uses Google Gemini to generate detailed recipes, including cooking steps, chef's notes, and nutritional values.
+  * **🖼️ Visual Recipe Cards:** Automatically fetches appetizing images for suggested dishes using a custom search API.
+  * **💾 Save Your Favorites:** Keep a personal cookbook by saving recipes you love for quick access later.
+  * **🥗 Dietary & Budget Preferences:**
+      * **Healthy Mode:** Filters for healthier, vegetable-heavy, or less oily options.
+      * **Budget & Pax Control:** Set a budget limit (in PHP) and specify the number of people you are cooking for.
+  * **🇵🇭 Bilingual Support:** Toggle between **English** and **Tagalog/Filipino** for a localized experience.
+  * **📱 Mobile-Responsive Design:** A beautiful, responsive UI that works perfectly on desktops, tablets, and mobile phones.
 
-💾 Save Your Favorites: Keep a personal cookbook by saving recipes you love for quick access later.
+## 🛠️ Tech Stack
 
-🥗 Dietary & Budget Preferences:
+  * **Frontend:** [React](https://react.dev/) (v19), [Vite](https://vitejs.dev/)
+  * **Styling:** [Tailwind CSS](https://tailwindcss.com/) (v4), [Lucide React](https://lucide.dev/) (Icons)
+  * **AI & Data:** [Google Gemini API](https://ai.google.dev/) (Generative AI), [Google Custom Search JSON API](https://developers.google.com/custom-search/v1/overview) (Image fetching)
+  * **State Management:** React `useState` & `useEffect` (with LocalStorage persistence)
 
-Healthy Mode: Filters for healthier, vegetable-heavy, or less oily options.
+## 📦 Installation
 
-Budget & Pax Control: Set a budget limit (in PHP) and specify the number of people you are cooking for.
-
-🇵🇭 Bilingual Support: Toggle between English and Tagalog/Filipino for a localized experience.
-
-📱 Mobile-Responsive Design: A beautiful, responsive UI that works perfectly on desktops, tablets, and mobile phones.
-
-🛠️ Tech Stack
-Frontend: React (v19), Vite
-
-Styling: Tailwind CSS (v4), Lucide React (Icons)
-
-AI & Data: Google Gemini API (Generative AI), Google Custom Search JSON API (Image fetching)
-
-State Management: React useState & useEffect (with LocalStorage persistence)
-
-📦 Installation
 Follow these steps to set up the project locally.
 
-Clone the repository
+1.  **Clone the repository**
 
-Bash
+    ```bash
+    git clone https://github.com/herodot0s/ulamapp.git
+    cd ulamapp
+    ```
 
-git clone https://github.com/herodot0s/ulamapp.git
-cd ulamapp
-Install dependencies
+2.  **Install dependencies**
 
-Bash
+    ```bash
+    npm install
+    ```
 
-npm install
-Environment Setup Create a .env file in the root directory and add your API keys:
+3.  **Environment Setup**
+    Create a `.env` file in the root directory and add your API keys:
 
-Code snippet
+    ```env
+    VITE_GEMINI_API_KEY=your_gemini_api_key_here
+    VITE_SEARCH_API_KEY=your_google_custom_search_api_key
+    VITE_SEARCH_ENGINE_ID=your_search_engine_id
+    ```
 
-VITE_GEMINI_API_KEY=your_gemini_api_key_here
-VITE_SEARCH_API_KEY=your_google_custom_search_api_key
-VITE_SEARCH_ENGINE_ID=your_search_engine_id
-Run the development server
+4.  **Run the development server**
 
-Bash
+    ```bash
+    npm run dev
+    ```
 
-npm run dev
-Open in Browser Visit http://localhost:5173 to view the app.
+5.  **Open in Browser**
+    Visit `http://localhost:5173` to view the app.
 
-📂 Project Structure
-Plaintext
+## 📂 Project Structure
 
+```text
 ulamapp/
 ├── public/              # Static assets
 ├── src/
@@ -77,32 +76,32 @@ ulamapp/
 │   └── main.jsx         # Entry point
 ├── .env                 # Environment variables (not committed)
 └── package.json         # Project dependencies
-📖 Usage
-Add Ingredients: Type ingredients into the search bar (e.g., "Pork, Kangkong") and click Add.
+```
 
-Customize Settings: Toggle "Healthy Mode" or set a budget and number of people (pax).
+## 📖 Usage
 
-Generate: Click the "Curate Menu" (or Maghanap ng Ulam) button.
+1.  **Add Ingredients:** Type ingredients into the search bar (e.g., "Pork, Kangkong") and click **Add**.
+2.  **Customize Settings:** Toggle "Healthy Mode" or set a budget and number of people (pax).
+3.  **Generate:** Click the **"Curate Menu"** (or *Maghanap ng Ulam*) button.
+4.  **View & Cook:** Browse the suggestions, click on a card to see the full recipe, and follow the step-by-step instructions.
+5.  **Save:** Click the heart icon ❤️ to save a recipe to your personal collection.
 
-View & Cook: Browse the suggestions, click on a card to see the full recipe, and follow the step-by-step instructions.
+## 🤝 Contributing
 
-Save: Click the heart icon ❤️ to save a recipe to your personal collection.
+Contributions are welcome\! If you have suggestions for improvements or new features:
 
-🤝 Contributing
-Contributions are welcome! If you have suggestions for improvements or new features:
+1.  Fork the repository.
+2.  Create a new branch (`git checkout -b feature/NewFeature`).
+3.  Commit your changes (`git commit -m 'Add some NewFeature'`).
+4.  Push to the branch (`git push origin feature/NewFeature`).
+5.  Open a Pull Request.
 
-Fork the repository.
+## 📄 License
 
-Create a new branch (git checkout -b feature/NewFeature).
+This project is open-source and available under the [MIT License](https://www.google.com/search?q=LICENSE).
 
-Commit your changes (git commit -m 'Add some NewFeature').
+## 👨‍💻 Authors
 
-Push to the branch (git push origin feature/NewFeature).
+  * **SFIT-2B Students "Watchdogs" ** - *Quezon City University*
 
-Open a Pull Request.
-
-📄 License
-This project is open-source and available under the MIT License.
-
-👨‍💻 Authors
-SFIT-2B Students - Quezon City University
+-----
