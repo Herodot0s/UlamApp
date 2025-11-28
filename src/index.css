@@ -1,1 +1,24 @@
 @import "tailwindcss";
+
+@import "tailwindcss";
+
+@media screen and (min-width: 1024px) {
+  :root {
+    /* This scales the entire app to 110%.
+       Supported by Chrome, Edge, and Safari.
+    */
+    zoom: 1.1;
+  }
+
+  /* Firefox does not support 'zoom', so we use a fallback.
+     This detects Firefox and applies a scale transform instead.
+  */
+  @supports (-moz-appearance:none) {
+    body {
+      transform: scale(1.1);
+      transform-origin: top center;
+      width: 90.9%; /* Compensate width: 100% / 1.1 */
+      margin: 0 auto;
+    }
+  }
+}
