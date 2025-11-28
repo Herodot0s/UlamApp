@@ -23,21 +23,21 @@ const AuthForms = ({
           <div className="bg-orange-500 w-16 h-16 rounded-2xl mx-auto flex items-center justify-center mb-4 shadow-lg shadow-orange-500/30">
             <ChefHat className="w-8 h-8 text-white" />
           </div>
-          <h1 className="font-serif text-3xl font-bold text-slate-900">Ulam AI</h1>
-          <p className="text-slate-500 text-sm mt-1">Your intelligent kitchen companion.</p>
+          <h1 className="font-serif text-3xl font-bold text-slate-900">UlamApp</h1>
+          <p className="text-slate-500 text-sm mt-1">Your AI kitchen companion.</p>
         </div>
 
         <form onSubmit={view === 'login' ? handleLogin : handleRegister} className="space-y-4">
           {view === 'register' && (
             <div className="space-y-1">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Username</label>
               <div className="relative group">
                 <User className="w-5 h-5 text-slate-400 absolute left-4 top-3.5 group-focus-within:text-orange-500 transition-colors" />
                 <input 
                   type="text" 
                   required
                   className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
-                  placeholder="Juan Dela Cruz"
+                  placeholder="Stephen right?"
                   value={authFormData.name}
                   onChange={e => setAuthFormData({...authFormData, name: e.target.value})}
                 />
@@ -53,7 +53,7 @@ const AuthForms = ({
                 type="email" 
                 required
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
-                placeholder="juan@example.com"
+                placeholder="Gregory@gmail.com"
                 value={authFormData.email}
                 onChange={e => setAuthFormData({...authFormData, email: e.target.value})}
               />
