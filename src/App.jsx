@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { ShoppingCart, Plus, X, Search, Trash2, ArrowLeft, Loader2, AlertCircle, Clock, BarChart3, Leaf, Flame, BookHeart, Users, Coins, Sparkles, Utensils } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ShoppingCart, Plus, X, Search, Trash2, ArrowLeft, Loader2, AlertCircle, Clock, BarChart3, Leaf, Flame, BookHeart, Users, Coins, Sparkles, Utensils, Camera } from 'lucide-react';
 
 // Imports from divided structure
 import { FEATURED_RECIPES } from './data/mockData';
 import { normalize, getFromCache, saveToCache } from './utils/helpers';
-import { fetchDishImage, fetchRecipeSuggestions, fetchFullRecipe } from './services/api';
+import { fetchDishImage, fetchRecipeSuggestions, fetchFullRecipe, identifyIngredientsFromImage } from './services/api';
 import Header from './components/Header';
 import AuthForms from './components/AuthForms';
 import RecipeView from './components/RecipeView';
@@ -33,6 +33,46 @@ const App = () => {
   });
 
   const [isHealthyMode, setIsHealthyMode] = useState(false);
+  
+  const fileInputRef = useRef(null);
+  const [isScanning, setIsScanning] = useState(false);
+
+  const handleCameraClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleFileChange = async (event) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    setIsScanning(true);
+    try {
+      // Call the API
+      const detectedIngredients = await identifyIngredientsFromImage(file);
+      
+      // Filter out duplicates that are already in the cart
+      const newIngredients = detectedIngredients.filter(
+        item => !cart.some(cartItem => normalize(cartItem) === normalize(item))
+      );
+
+      if (newIngredients.length > 0) {
+        setCart(prev => [...prev, ...newIngredients]);
+        // Optional: Show a success toast or alert
+        // alert(`Added: ${newIngredients.join(', ')}`); 
+      } else {
+        setError("No new ingredients detected or they are already in your list.");
+        setTimeout(() => setError(null), 3000);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to scan image. Please try again.");
+      setTimeout(() => setError(null), 3000);
+    } finally {
+      setIsScanning(false);
+      // Reset input so same file can be selected again if needed
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
   
   // --- BUDGET & PAX STATE ---
   const [budget, setBudget] = useState("");
@@ -354,6 +394,16 @@ const App = () => {
 
                   {/* Input Section */}
                   <div className="space-y-4">
+                    {/* HIDDEN FILE INPUT FOR CAMERA */}
+                    <input 
+                      type="file" 
+                      ref={fileInputRef}
+                      accept="image/*"
+                      capture="environment" // Forces rear camera on mobile
+                      className="hidden"
+                      onChange={handleFileChange}
+                    />
+
                     <div className="relative group">
                       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
                         <Search className="h-5 w-5 text-slate-400 group-focus-within:text-orange-500 transition-colors" />
@@ -363,17 +413,39 @@ const App = () => {
                           type="text"
                           value={input}
                           onChange={(e) => setInput(e.target.value)}
-                          placeholder={language === 'ph' ? "Lagay ng ingredient (e.g. manok)..." : "Type an ingredient..."}
-                          className="block w-full pl-11 pr-4 py-4 bg-white border-0 ring-1 ring-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-orange-500/20 focus:shadow-lg focus:shadow-orange-500/10 transition-all text-base"
+                          placeholder={language === 'ph' ? "Lagay ng ingredient (e.g. manok)..." : "Type ingredient or scan..."}
+                          // CHANGED: Increased pr-4 to pr-28 to fit both buttons
+                          className="block w-full pl-11 pr-28 py-4 bg-white border-0 ring-1 ring-slate-200 rounded-2xl text-slate-900 placeholder:text-slate-400 focus:ring-2 focus:ring-orange-500/20 focus:shadow-lg focus:shadow-orange-500/10 transition-all text-base"
                         />
                       </form>
-                      <button 
-                        onClick={handleAddIngredient}
-                        disabled={!input.trim()}
-                        className="absolute right-2 top-2 bottom-2 bg-slate-900 text-white px-4 rounded-xl text-sm font-medium hover:bg-slate-800 disabled:opacity-0 disabled:scale-90 transition-all"
-                      >
-                        Add
-                      </button>
+
+                      {/* BUTTON GROUP */}
+                      <div className="absolute right-2
+                       top-2 bottom-2 flex items-center gap-2">
+                        
+                        {/* CAMERA BUTTON */}
+                        <button
+                          onClick={handleCameraClick}
+                          disabled={isScanning || isProcessing}
+                          className="text-slate-400 hover:text-orange-500 hover:bg-orange-50 p-2.5 rounded-xl transition-all disabled:opacity-50"
+                          title="Scan Ingredients"
+                        >
+                          {isScanning ? (
+                            <Loader2 className="w-5 h-5 animate-spin text-orange-500" />
+                          ) : (
+                            <Camera className="w-5 h-5" />
+                          )}
+                        </button>
+
+                        {/* ADD BUTTON */}
+                        <button 
+                          onClick={handleAddIngredient}
+                          disabled={!input.trim()}
+                          className="bg-slate-900 text-white px-4 py-2 rounded-xl text-sm font-medium hover:bg-slate-800 disabled:opacity-0 disabled:scale-90 transition-all"
+                        >
+                          Add
+                        </button>
+                      </div>
                     </div>
 
                     {/* Ingredient Chips */}
