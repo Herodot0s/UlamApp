@@ -41,6 +41,60 @@ export const fetchDishImage = async (dishName) => {
   }
 };
 
+// --- INGREDIENT RECOGNITION (CAMERA) ---
+export const identifyIngredientsFromImage = async (imageFile) => {
+  // Helper to convert File to Base64
+  const toBase64 = file => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+
+  const base64String = await toBase64(imageFile);
+  // Remove the data URL prefix (e.g., "data:image/jpeg;base64,") for the API
+  const cleanBase64 = base64String.split(',')[1];
+  const mimeType = base64String.split(';')[0].split(':')[1];
+
+  const prompt = `
+    Analyze this image of food ingredients (on a table, counter, or fridge).
+    Identify the raw ingredients visible (e.g., "Chicken", "Eggplant", "Garlic", "Soy Sauce", "Can of Tuna").
+    Ignore general kitchen objects or background items.
+    Return ONLY a JSON array of strings. Example: ["Pork", "Kangkong", "Onion"]
+    Do not use markdown formatting.
+  `;
+
+  const response = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${import.meta.env.VITE_GEMINI_API_KEY}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        contents: [{
+          parts: [
+            { text: prompt },
+            {
+              inline_data: {
+                mime_type: mimeType,
+                data: cleanBase64
+              }
+            }
+          ]
+        }]
+      }),
+    }
+  );
+
+  const data = await response.json();
+  // Check if candidate exists to prevent crashes
+  if (!data.candidates || data.candidates.length === 0) {
+      throw new Error("Could not identify ingredients.");
+  }
+  
+  const text = data.candidates[0].content.parts[0].text;
+  const cleanJson = text.replace(/```json|```/g, '').trim();
+  return JSON.parse(cleanJson);
+};
 
 // --- RECIPE SUGGESTION FUNCTION (UPDATED TO FETCH IMAGES) ---
 export const fetchRecipeSuggestions = async ({ cart, pax, budget, isHealthyMode, language }) => {
