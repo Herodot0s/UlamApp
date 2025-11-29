@@ -210,6 +210,10 @@ const App = () => {
 
   // --- CONTROLLER: VIEW RECIPE & IMAGES ---
   const handleViewRecipe = async (recipe) => {
+    setRecentlyViewed(prev => {
+      const filtered = prev.filter(r => r.id !== recipe.id);
+      return [recipe, ...filtered].slice(0, 6);
+    });
     setSelectedRecipe(recipe);
     setView('recipe');
     
@@ -273,6 +277,18 @@ const App = () => {
     setView('input');
     setError(null);
   };
+
+  //recently viewed ulam
+  const [recentlyViewed, setRecentlyViewed] = useState(() => {
+    const saved = localStorage.getItem('ulam_recently_viewed');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  // Save Recently Viewed whenever it changes
+  useEffect(() => {
+    localStorage.setItem('ulam_recently_viewed', JSON.stringify(recentlyViewed));
+  }, [recentlyViewed]);
+
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] font-sans text-slate-900 selection:bg-orange-100 selection:text-orange-900 relative overflow-x-hidden">
@@ -488,6 +504,61 @@ const App = () => {
                     </div>
                   )}
                 </div>
+
+                {/* RECENTLY VIEWED SECTION */}
+                {recentlyViewed.length > 0 && (
+                  <div className="pt-8 border-t border-slate-100 mb-8">
+                    <div className="flex items-center justify-between mb-6 px-2">
+                      <div>
+                        <h3 className="font-serif text-2xl text-slate-900 font-bold">
+                          {language === 'ph' ? 'Huling Tiningnan' : 'Recently Viewed'}
+                        </h3>
+                        <p className="text-slate-500 text-sm">
+                          {language === 'ph' ? 'Balikan ang iyong mga nakita.' : 'Jump back into what you were looking at.'}
+                        </p>
+                      </div>
+                      <Clock className="w-6 h-6 text-slate-400" />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {recentlyViewed.map((recipe) => (
+                        <div 
+                          key={recipe.id}
+                          onClick={() => handleViewRecipe(recipe)}
+                          className="group bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 cursor-pointer flex flex-col h-full"
+                        >
+                          {/* Image Thumb */}
+                          <div className="h-40 overflow-hidden relative">
+                             {recipe.image ? (
+                               <img 
+                                  src={recipe.image} 
+                                  alt={recipe.name} 
+                                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                               />
+                             ) : (
+                               <div className="w-full h-full bg-slate-100 flex items-center justify-center">
+                                 <Utensils className="text-slate-300 w-8 h-8" />
+                               </div>
+                             )}
+                             <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
+                                <Clock className="w-3 h-3" /> {recipe.prepTime}
+                             </div>
+                          </div>
+
+                          {/* Content */}
+                          <div className="p-5 flex-1 flex flex-col">
+                             <h4 className="font-serif text-lg font-bold text-slate-900 mb-1 group-hover:text-orange-600 transition-colors">
+                                {recipe.name}
+                             </h4>
+                             <p className="text-slate-500 text-xs line-clamp-2 flex-1">
+                                {recipe.description}
+                             </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
 
                 {/* FEATURED / TRENDING SECTION (HOMEPAGE FEED) */}
                 <div className="pt-8 border-t border-slate-100">
