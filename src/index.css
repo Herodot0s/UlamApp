@@ -1,7 +1,5 @@
 @import "tailwindcss";
 
-@import "tailwindcss";
-
 @media screen and (min-width: 1024px) {
   :root {
     /* This scales the entire app to 110%.
