@@ -15,11 +15,9 @@ export const fetchDishImage = async (dishName) => {
   }
 
   try {
-    const query = encodeURIComponent(`${dishName} filipino food appetizing`);
-    
-    // USES SEARCH_API_KEY
+    const query = encodeURIComponent(`"${dishName}" authentic filipino food recipe`);
     const response = await fetch(
-      `https://www.googleapis.com/customsearch/v1?key=${SEARCH_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${query}&searchType=image&num=1&imgSize=large&safe=active`,
+      `https://www.googleapis.com/customsearch/v1?key=${SEARCH_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${query}&searchType=image&num=1&imgSize=large&imgType=photo&safe=active`,
       { method: "GET" }
     );
 
@@ -107,7 +105,7 @@ export const fetchRecipeSuggestions = async ({ cart, pax, budget, isHealthyMode,
     : "Suggest popular Filipino dishes.";
   
   const budgetContext = budget 
-    ? `STRICT CONSTRAINT: The total estimated cost of ingredients must be around or under ₱${budget} PHP. If impossible, suggest the closest options.`
+    ? `STRICT CONSTRAINT: The total estimated cost of ingredients must be around or under ₱${budget} PHP. If impossible, suggest the closest and realistic options.`
     : "Provide estimated cost in PHP.";
 
   const prompt = `
