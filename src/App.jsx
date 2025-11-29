@@ -9,6 +9,8 @@ import Header from './components/Header';
 import AuthForms from './components/AuthForms';
 import RecipeView from './components/RecipeView';
 import AboutContact from './components/AboutContact';
+import UserSettings from './components/UserSettings';
+
 
 const App = () => {
   // --- APP STATE ---
@@ -133,6 +135,20 @@ const App = () => {
     setView('input');
   };
 
+  {/* VIEW: USER SETTINGS */}
+  {view === 'settings' && user && (
+    <UserSettings 
+      user={user}
+      setUser={setUser}
+      language={language}
+      setLanguage={setLanguage}
+      isHealthyMode={isHealthyMode}
+      setIsHealthyMode={setIsHealthyMode}
+      pax={pax}
+      setPax={setPax}
+      setView={setView}
+    />
+  )}
   // --- APP ACTIONS ---
   const toggleLanguage = () => {
     setLanguage(prev => prev === 'en' ? 'ph' : 'en');
@@ -331,6 +347,21 @@ const App = () => {
 
           <main className="max-w-6xl mx-auto pb-24 pt-20 min-h-screen relative px-4">
             
+            {/* VIEW: USER SETTINGS */}
+            {view === 'settings' && user && (
+              <UserSettings 
+                user={user}
+                setUser={setUser}
+                language={language}
+                setLanguage={setLanguage}
+                isHealthyMode={isHealthyMode}
+                setIsHealthyMode={setIsHealthyMode}
+                pax={pax}
+                setPax={setPax}
+                setView={setView}
+              />
+            )}
+
             {/* VIEW: HOME (INPUT + FEATURED) */}
             {view === 'input' && (
               <div className="space-y-12 animate-in fade-in duration-500">
