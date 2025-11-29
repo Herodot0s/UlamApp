@@ -60,9 +60,6 @@ const Header = ({
                      <p className="text-xs text-slate-400 font-bold uppercase">Signed in as</p>
                      <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
                    </div>
-                   <button onClick={() => setView('about')} className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg flex items-center gap-2">
-                     <Info className="w-4 h-4" /> About Us
-                   </button>
                    <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2">
                      <LogOut className="w-4 h-4" /> Sign Out
                    </button>
