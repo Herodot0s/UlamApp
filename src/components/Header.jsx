@@ -1,5 +1,5 @@
 import React from 'react';
-import { ChefHat, Globe, UserCircle, LogOut, BookHeart, Info } from 'lucide-react';
+import { ChefHat, Globe, UserCircle, LogOut, BookHeart, Info, Settings } from 'lucide-react';
 
 const Header = ({ 
   view, 
@@ -60,6 +60,15 @@ const Header = ({
                      <p className="text-xs text-slate-400 font-bold uppercase">Signed in as</p>
                      <p className="text-sm font-bold text-slate-800 truncate">{user.name}</p>
                    </div>
+
+                   <button 
+                      onClick={() => setView('settings')} 
+                      className="w-full text-left px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 hover:text-orange-600 rounded-lgSVGc transition-colors flex items-center gap-2 mb-1"
+                    >
+                      <Settings className="w-4 h-4" /> Settings
+                    </button>
+
+                   
                    <button onClick={handleLogout} className="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2">
                      <LogOut className="w-4 h-4" /> Sign Out
                    </button>
