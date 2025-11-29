@@ -1,12 +1,11 @@
 import React from 'react';
-import { ChefHat, User, Mail, Lock, Loader2, ArrowRight, Zap } from 'lucide-react';
+import { ChefHat, User, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
 
 const AuthForms = ({
   view,
   setView,
   handleLogin,
   handleRegister,
-  handleDemoLogin,
   authFormData,
   setAuthFormData,
   isAuthLoading,
@@ -76,23 +75,6 @@ const AuthForms = ({
             </div>
           </div>
 
-          {view === 'register' && (
-            <div className="space-y-1 animate-in slide-in-from-top-2">
-              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Confirm Password</label>
-              <div className="relative group">
-                <Lock className="w-5 h-5 text-slate-400 absolute left-4 top-3.5 group-focus-within:text-orange-500 transition-colors" />
-                <input 
-                  type="password" 
-                  required
-                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
-                  placeholder="••••••••"
-                  value={authFormData.confirmPassword}
-                  onChange={e => setAuthFormData({...authFormData, confirmPassword: e.target.value})}
-                />
-              </div>
-            </div>
-          )}
-
           <button 
             type="submit" 
             disabled={isAuthLoading}
@@ -100,27 +82,13 @@ const AuthForms = ({
           >
             {isAuthLoading ? <Loader2 className="w-5 h-5 animate-spin" /> : (view === 'login' ? 'Sign In' : 'Create Account')}
           </button>
-          
-          {view === 'login' && (
-             <button 
-               type="button"
-               onClick={handleDemoLogin}
-               disabled={isAuthLoading}
-               className="w-full bg-orange-50 text-orange-600 font-bold py-3 rounded-xl border border-orange-100 hover:bg-orange-100 hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-2"
-             >
-                <Zap className="w-4 h-4" /> Try Demo Account
-             </button>
-          )}
         </form>
 
         <div className="mt-6 text-center space-y-4">
           <p className="text-sm text-slate-500">
             {view === 'login' ? "Don't have an account?" : "Already have an account?"}{' '}
             <button 
-              onClick={() => {
-                 setView(view === 'login' ? 'register' : 'login');
-                 setAuthFormData({ name: '', email: '', password: '', confirmPassword: '' });
-              }}
+              onClick={() => setView(view === 'login' ? 'register' : 'login')}
               className="font-bold text-orange-600 hover:underline"
             >
               {view === 'login' ? 'Sign up' : 'Log in'}
