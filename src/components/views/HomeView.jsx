@@ -1,8 +1,8 @@
 // src/components/views/HomeView.jsx
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   Search, Camera, Loader2, Trash2, X, Leaf, 
-  Clock, Utensils, BarChart3, Flame, Sparkles, Coins 
+  Clock, Utensils, BarChart3, Flame, Sparkles, Coins, Mail, AlertCircle 
 } from 'lucide-react';
 import { FEATURED_RECIPES } from '../../data/mockData';
 
@@ -13,8 +13,41 @@ const HomeView = ({
   settings,   // { budget, pax, isHealthyMode }
   setSettings,// State setter for settings
   recipes,    // from useRecipes hook
-  generateSuggestions 
+  generateSuggestions,
+  resendConfirmationEmail
 }) => {
+  // State for trending recipes
+  const [trendingRecipes, setTrendingRecipes] = useState([]);
+  const [isLoadingTrending, setIsLoadingTrending] = useState(true);
+
+  // Fetch trending recipes on mount
+  useEffect(() => {
+    const loadTrending = async () => {
+      setIsLoadingTrending(true);
+      try {
+        if (recipes.fetchTrendingRecipes) {
+          const trending = await recipes.fetchTrendingRecipes(6);
+          if (trending && trending.length > 0) {
+            setTrendingRecipes(trending);
+          } else {
+            // Fallback to featured recipes if no trending data
+            setTrendingRecipes(FEATURED_RECIPES);
+          }
+        } else {
+          // Fallback if function not available
+          setTrendingRecipes(FEATURED_RECIPES);
+        }
+      } catch (err) {
+        console.error('Error loading trending recipes:', err);
+        // Fallback to featured recipes on error
+        setTrendingRecipes(FEATURED_RECIPES);
+      } finally {
+        setIsLoadingTrending(false);
+      }
+    };
+
+    loadTrending();
+  }, [recipes.fetchTrendingRecipes]);
   
   // Helper handlers for the settings object
   const toggleHealthy = () => {
@@ -31,6 +64,41 @@ const HomeView = ({
 
   return (
     <div className="space-y-12 animate-in fade-in duration-500">
+      
+      {/* Email Confirmation Banner */}
+      {user && user.emailConfirmed === false && (
+        <div className="max-w-md mx-auto p-4 bg-yellow-50 border border-yellow-200 rounded-2xl shadow-sm">
+          <div className="flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-yellow-900 mb-1">
+                {language === 'ph' ? 'Kailangan i-confirm ang email' : 'Email Confirmation Required'}
+              </p>
+              <p className="text-xs text-yellow-700 mb-3">
+                {language === 'ph' 
+                  ? 'Tingnan ang iyong inbox para sa confirmation email. Kailangan mong i-confirm ang email bago makapag-save ng recipes.'
+                  : 'Please check your inbox for the confirmation email. You need to confirm your email before saving recipes.'}
+              </p>
+              {resendConfirmationEmail && (
+                <button
+                  onClick={async () => {
+                    const result = await resendConfirmationEmail();
+                    if (result?.success) {
+                      alert(language === 'ph' 
+                        ? 'Na-send na ang confirmation email! Tingnan ang iyong inbox.'
+                        : 'Confirmation email sent! Please check your inbox.');
+                    }
+                  }}
+                  className="text-xs font-bold text-yellow-700 hover:text-yellow-900 underline flex items-center gap-1"
+                >
+                  <Mail className="w-3 h-3" />
+                  {language === 'ph' ? 'I-resend ang email' : 'Resend Confirmation Email'}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Hero / Input Section */}
       <div className="max-w-md mx-auto space-y-8">
@@ -261,14 +329,34 @@ const HomeView = ({
       <div className="pt-8 border-t border-slate-100">
         <div className="flex items-center justify-between mb-6 px-2">
           <div>
-            <h3 className="font-serif text-2xl text-slate-900 font-bold">Trending Now</h3>
-            <p className="text-slate-500 text-sm">Popular dishes in the Philippines today.</p>
+            <h3 className="font-serif text-2xl text-slate-900 font-bold">
+              {language === 'ph' ? 'Trending Ngayon' : 'Trending Now'}
+            </h3>
+            <p className="text-slate-500 text-sm">
+              {language === 'ph' 
+                ? 'Mga sikat na ulam ngayon.' 
+                : 'Popular dishes being viewed right now.'}
+            </p>
           </div>
           <Flame className="w-6 h-6 text-orange-500" />
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {FEATURED_RECIPES.map((recipe) => (
+        {isLoadingTrending ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 animate-pulse">
+                <div className="h-48 bg-slate-200"></div>
+                <div className="p-5">
+                  <div className="h-6 bg-slate-200 rounded mb-2"></div>
+                  <div className="h-4 bg-slate-200 rounded mb-4"></div>
+                  <div className="h-4 bg-slate-200 rounded w-2/3"></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {trendingRecipes.map((recipe) => (
             <div 
               key={recipe.id}
               onClick={() => recipes.handleViewRecipe(recipe)}
@@ -277,12 +365,17 @@ const HomeView = ({
               {/* Image Thumb */}
               <div className="h-48 overflow-hidden relative">
                  <img 
-                    src={recipe.image} 
+                    src={recipe.image || 'https://via.placeholder.com/400x300?text=Recipe'} 
                     alt={recipe.name} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                  />
+                 {recipe.viewCount && (
+                   <div className="absolute top-3 left-3 bg-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1">
+                     <Flame className="w-3 h-3" /> {recipe.viewCount}
+                   </div>
+                 )}
                  <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
-                    <Clock className="w-3 h-3" /> {recipe.prepTime}
+                    <Clock className="w-3 h-3" /> {recipe.prepTime || '45m'}
                  </div>
               </div>
 
@@ -307,6 +400,7 @@ const HomeView = ({
             </div>
           ))}
         </div>
+        )}
       </div>
 
       {/* FAB for Generating Menu */}

@@ -10,7 +10,7 @@ const SavedRecipesView = ({
   user 
 }) => {
   return (
-    <div className="p-4 animate-in slide-in-from-right-8 duration-500 max-w-md mx-auto">
+    <div className="p-4 animate-in slide-in-from-right-8 duration-500 max-w-6xl mx-auto">
       
       {/* Back Button */}
       <button 
@@ -32,7 +32,7 @@ const SavedRecipesView = ({
 
       {/* Content */}
       {savedRecipes.length === 0 ? (
-        <div className="text-center py-12 bg-white rounded-3xl border border-slate-100 border-dashed">
+        <div className="text-center py-12 bg-white rounded-3xl border border-slate-100 border-dashed max-w-md mx-auto">
            <BookHeart className="w-12 h-12 text-slate-200 mx-auto mb-4" />
            <p className="text-slate-500">
              {language === 'ph' ? 'Wala ka pang naka-save.' : 'No saved recipes yet.'}
@@ -47,7 +47,7 @@ const SavedRecipesView = ({
            )}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {savedRecipes.map((recipe) => (
              <div 
                key={recipe.id} 

@@ -1,5 +1,5 @@
-import React from 'react';
-import { ChefHat, User, Mail, Lock, Loader2, ArrowRight } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { ChefHat, User, Mail, Lock, Loader2, ArrowRight, AlertCircle, X, KeyRound } from 'lucide-react';
 
 const AuthForms = ({
   view,
@@ -9,8 +9,33 @@ const AuthForms = ({
   authFormData,
   setAuthFormData,
   isAuthLoading,
-  handleGuestAccess
+  authError,
+  setAuthError,
+  handleGuestAccess,
+  handleForgotPassword
 }) => {
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
+  const [forgotPasswordEmail, setForgotPasswordEmail] = useState('');
+  const [forgotPasswordSuccess, setForgotPasswordSuccess] = useState(false);
+
+  // Auto-dismiss error after 5 seconds
+  useEffect(() => {
+    if (authError) {
+      const timer = setTimeout(() => setAuthError(null), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [authError, setAuthError]);
+
+  const handleForgotPasswordSubmit = async (e) => {
+    e.preventDefault();
+    const result = await handleForgotPassword(forgotPasswordEmail);
+    if (result.success) {
+      setForgotPasswordSuccess(true);
+      setAuthError(null);
+    } else {
+      setAuthError(result.message);
+    }
+  };
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-6 relative">
       <div className="absolute top-[-10%] right-[-10%] w-64 h-64 bg-orange-400 rounded-full blur-[100px] opacity-20"></div>
@@ -26,6 +51,20 @@ const AuthForms = ({
           <h1 className="font-serif text-3xl font-bold text-slate-900">UlamApp</h1>
           <p className="text-slate-500 text-sm mt-1">Your AI kitchen companion.</p>
         </div>
+
+        {/* Error Message */}
+        {authError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl flex items-start gap-2 text-sm text-red-800">
+            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+            <p className="flex-1">{authError}</p>
+            <button
+              onClick={() => setAuthError(null)}
+              className="shrink-0 hover:text-red-900"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
 
         <form onSubmit={view === 'login' ? handleLogin : handleRegister} className="space-y-4">
           {view === 'register' && (
@@ -46,14 +85,20 @@ const AuthForms = ({
           )}
 
           <div className="space-y-1">
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Email Address</label>
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">
+              {view === 'login' ? 'Username / Email' : 'Email Address'}
+            </label>
             <div className="relative group">
-              <Mail className="w-5 h-5 text-slate-400 absolute left-4 top-3.5 group-focus-within:text-orange-500 transition-colors" />
+              {view === 'login' ? (
+                <User className="w-5 h-5 text-slate-400 absolute left-4 top-3.5 group-focus-within:text-orange-500 transition-colors" />
+              ) : (
+                <Mail className="w-5 h-5 text-slate-400 absolute left-4 top-3.5 group-focus-within:text-orange-500 transition-colors" />
+              )}
               <input 
-                type="email" 
+                type={view === 'login' ? 'text' : 'email'}
                 required
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
-                placeholder="Gregory@gmail.com"
+                placeholder={view === 'login' ? 'Enter your username or email' : 'Gregory@gmail.com'}
                 value={authFormData.email}
                 onChange={e => setAuthFormData({...authFormData, email: e.target.value})}
               />
@@ -74,6 +119,40 @@ const AuthForms = ({
               />
             </div>
           </div>
+
+          {/* Confirm Password Field (Register Only) */}
+          {view === 'register' && (
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Confirm Password</label>
+              <div className="relative group">
+                <Lock className="w-5 h-5 text-slate-400 absolute left-4 top-3.5 group-focus-within:text-orange-500 transition-colors" />
+                <input 
+                  type="password" 
+                  required
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
+                  placeholder="••••••••"
+                  value={authFormData.confirmPassword}
+                  onChange={e => setAuthFormData({...authFormData, confirmPassword: e.target.value})}
+                />
+              </div>
+              {authFormData.password && authFormData.confirmPassword && authFormData.password !== authFormData.confirmPassword && (
+                <p className="text-xs text-red-500 ml-1 mt-1">Passwords do not match</p>
+              )}
+            </div>
+          )}
+
+          {/* Forgot Password Link (Login Only) */}
+          {view === 'login' && (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => setShowForgotPassword(true)}
+                className="text-xs text-orange-600 hover:text-orange-700 font-medium hover:underline"
+              >
+                Forgot Password?
+              </button>
+            </div>
+          )}
 
           <button 
             type="submit" 
@@ -108,6 +187,92 @@ const AuthForms = ({
           </button>
         </div>
       </div>
+
+      {/* Forgot Password Modal */}
+      {showForgotPassword && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-[2rem] p-6 max-w-md w-full relative shadow-2xl">
+            <button
+              onClick={() => {
+                setShowForgotPassword(false);
+                setForgotPasswordEmail('');
+                setForgotPasswordSuccess(false);
+              }}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            {!forgotPasswordSuccess ? (
+              <>
+                <div className="mb-4">
+                  <div className="bg-orange-100 w-12 h-12 rounded-xl flex items-center justify-center mb-3">
+                    <KeyRound className="w-6 h-6 text-orange-600" />
+                  </div>
+                  <h3 className="font-serif text-2xl font-bold text-slate-900 mb-1">Forgot Password?</h3>
+                  <p className="text-sm text-slate-500">
+                    Enter your email address and we'll send you instructions to reset your password.
+                  </p>
+                </div>
+
+                <form onSubmit={handleForgotPasswordSubmit} className="space-y-4">
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Email Address</label>
+                    <div className="relative group">
+                      <Mail className="w-5 h-5 text-slate-400 absolute left-4 top-3.5 group-focus-within:text-orange-500 transition-colors" />
+                      <input 
+                        type="email" 
+                        required
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl py-3 pl-12 pr-4 outline-none focus:border-orange-500 focus:ring-2 focus:ring-orange-200 transition-all"
+                        placeholder="your@email.com"
+                        value={forgotPasswordEmail}
+                        onChange={e => setForgotPasswordEmail(e.target.value)}
+                      />
+                    </div>
+                  </div>
+
+                  <button 
+                    type="submit" 
+                    disabled={isAuthLoading}
+                    className="w-full bg-slate-900 text-white font-bold py-3 rounded-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                  >
+                    {isAuthLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" /> Sending...
+                      </>
+                    ) : (
+                      'Send Reset Link'
+                    )}
+                  </button>
+                </form>
+              </>
+            ) : (
+              <div className="text-center py-4">
+                <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <Mail className="w-8 h-8 text-green-600" />
+                </div>
+                <h3 className="font-serif text-xl font-bold text-slate-900 mb-2">Check Your Email!</h3>
+                <p className="text-sm text-slate-600 mb-4">
+                  We've sent password reset instructions to <strong>{forgotPasswordEmail}</strong>
+                </p>
+                <p className="text-xs text-slate-500 mb-4">
+                  Didn't receive the email? Check your spam folder or try again.
+                </p>
+                <button
+                  onClick={() => {
+                    setShowForgotPassword(false);
+                    setForgotPasswordEmail('');
+                    setForgotPasswordSuccess(false);
+                  }}
+                  className="text-sm text-orange-600 font-bold hover:underline"
+                >
+                  Back to Sign In
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

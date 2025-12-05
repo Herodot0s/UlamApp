@@ -62,7 +62,10 @@ const App = () => {
         authFormData={auth.authFormData}
         setAuthFormData={auth.setAuthFormData}
         isAuthLoading={auth.isAuthLoading}
+        authError={auth.authError}
+        setAuthError={auth.setAuthError}
         handleGuestAccess={auth.handleGuestAccess}
+        handleForgotPassword={auth.handleForgotPassword}
       />
     );
   }
@@ -119,6 +122,7 @@ const App = () => {
                setSettings={setSettings}
                recipes={recipes}
                generateSuggestions={recipes.generateSuggestions}
+               resendConfirmationEmail={auth.resendConfirmationEmail}
             />
           )}
 
@@ -163,6 +167,8 @@ const App = () => {
               savedRecipes={recipes.savedRecipes}
               language={language}
               pax={settings.pax}
+              user={auth.user}
+              resendConfirmationEmail={auth.resendConfirmationEmail}
             />
           )}
 
