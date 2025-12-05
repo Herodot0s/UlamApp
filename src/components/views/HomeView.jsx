@@ -293,18 +293,27 @@ const HomeView = ({
                 className="group bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 cursor-pointer flex flex-col h-full"
               >
                 {/* Image Thumb */}
-                <div className="h-40 overflow-hidden relative">
+                <div className="h-40 overflow-hidden relative bg-slate-100">
                    {recipe.image ? (
                      <img 
                         src={recipe.image} 
                         alt={recipe.name} 
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        onError={(e) => {
+                          // If image fails to load, hide it and show fallback
+                          e.target.style.display = 'none';
+                          const fallback = e.target.nextElementSibling;
+                          if (fallback) fallback.style.display = 'flex';
+                        }}
                      />
-                   ) : (
-                     <div className="w-full h-full bg-slate-100 flex items-center justify-center">
-                       <Utensils className="text-slate-300 w-8 h-8" />
-                     </div>
-                   )}
+                   ) : null}
+                   {/* Fallback if no image or image fails */}
+                   <div 
+                     className="w-full h-full flex items-center justify-center bg-slate-100"
+                     style={{ display: recipe.image ? 'none' : 'flex' }}
+                   >
+                     <Utensils className="text-slate-300 w-8 h-8" />
+                   </div>
                    <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg text-xs font-bold text-slate-800 shadow-sm flex items-center gap-1">
                       <Clock className="w-3 h-3" /> {recipe.prepTime}
                    </div>
@@ -363,12 +372,27 @@ const HomeView = ({
               className="group bg-white rounded-3xl overflow-hidden shadow-sm border border-slate-100 hover:shadow-xl hover:shadow-orange-500/10 transition-all duration-300 cursor-pointer flex flex-col h-full"
             >
               {/* Image Thumb */}
-              <div className="h-48 overflow-hidden relative">
-                 <img 
-                    src={recipe.image || 'https://via.placeholder.com/400x300?text=Recipe'} 
-                    alt={recipe.name} 
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                 />
+              <div className="h-48 overflow-hidden relative bg-slate-100">
+                 {recipe.image ? (
+                   <img 
+                      src={recipe.image} 
+                      alt={recipe.name} 
+                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                      onError={(e) => {
+                        // If image fails to load, hide it and show fallback
+                        e.target.style.display = 'none';
+                        const fallback = e.target.nextElementSibling;
+                        if (fallback) fallback.style.display = 'flex';
+                      }}
+                   />
+                 ) : null}
+                 {/* Fallback if no image or image fails */}
+                 <div 
+                   className="w-full h-full flex items-center justify-center bg-orange-50"
+                   style={{ display: recipe.image ? 'none' : 'flex' }}
+                 >
+                   <Utensils className="text-orange-300 w-8 h-8" />
+                 </div>
                  {recipe.viewCount && (
                    <div className="absolute top-3 left-3 bg-orange-500 text-white px-2 py-1 rounded-lg text-xs font-bold shadow-sm flex items-center gap-1">
                      <Flame className="w-3 h-3" /> {recipe.viewCount}

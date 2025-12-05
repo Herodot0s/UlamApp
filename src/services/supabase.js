@@ -14,8 +14,16 @@ if (!isSupabaseConfigured) {
   console.error('See SUPABASE_SETUP.md for instructions');
 }
 
-// Create Supabase client (will use empty strings if not configured, which will cause API calls to fail)
-export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '');
+// Create Supabase client with session persistence
+export const supabase = createClient(supabaseUrl || '', supabaseAnonKey || '', {
+  auth: {
+    persistSession: true,
+    autoRefreshToken: true,
+    detectSessionInUrl: true,
+    storage: window.localStorage,
+    storageKey: 'supabase.auth.token'
+  }
+});
 
 // Database table names
 export const TABLES = {

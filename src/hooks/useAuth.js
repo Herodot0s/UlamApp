@@ -10,35 +10,48 @@ export const useAuth = (setView) => {
   const [authError, setAuthError] = useState(null);
 
   // --- EFFECTS ---
-  // Check for existing session on mount
+  // Check for existing session on mount and restore it
   useEffect(() => {
     if (!isSupabaseConfigured) {
       console.warn('Skipping session check - Supabase not configured');
       return;
     }
 
-    // Get initial session
-    supabase.auth.getSession()
-      .then(({ data: { session }, error }) => {
+    // Function to restore session
+    const restoreSession = async () => {
+      try {
+        // Get initial session from Supabase (this checks localStorage automatically)
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
         if (error) {
           console.error('Error getting session:', error);
           return;
         }
+        
         if (session?.user) {
-          loadUserProfile(session.user);
+          console.log('Session found, restoring user:', session.user.email);
+          await loadUserProfile(session.user);
+        } else {
+          console.log('No active session found');
+          setUser(null);
         }
-      })
-      .catch((err) => {
-        console.error('Failed to get session:', err);
-      });
+      } catch (err) {
+        console.error('Failed to restore session:', err);
+        setUser(null);
+      }
+    };
 
-    // Listen for auth changes
+    // Restore session immediately
+    restoreSession();
+
+    // Listen for auth changes (handles login, logout, token refresh)
     let subscription = null;
     try {
       const {
         data: { subscription: sub },
       } = supabase.auth.onAuthStateChange(async (event, session) => {
-        console.log('Auth state changed:', event);
+        console.log('Auth state changed:', event, session?.user?.email);
+        
         if (session?.user) {
           await loadUserProfile(session.user);
         } else {

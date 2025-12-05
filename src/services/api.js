@@ -7,36 +7,148 @@ const SEARCH_API_KEY = import.meta.env.VITE_SEARCH_API_KEY;
 const SEARCH_ENGINE_ID = import.meta.env.VITE_SEARCH_ENGINE_ID;
 
 
-// --- IMAGE SEARCH FUNCTION ---
+// --- IMAGE SEARCH FUNCTION (IMPROVED) ---
 export const fetchDishImage = async (dishName) => {
-  if (!SEARCH_ENGINE_ID) {
-    console.warn("Please set a SEARCH_ENGINE_ID in api.js to enable image search.");
+  if (!dishName || !dishName.trim()) {
     return null;
   }
 
+  // Clean dish name for better search results
+  const cleanDishName = dishName.trim();
+  
+  // Multiple search query strategies for better results
+  const searchQueries = [
+    `"${cleanDishName}" filipino food recipe authentic`,
+    `${cleanDishName} philippines food dish`,
+    `filipino ${cleanDishName} recipe`,
+    `${cleanDishName} ulam pinoy`
+  ];
+
+  // Try Google Custom Search first (if configured)
+  if (SEARCH_ENGINE_ID && SEARCH_API_KEY) {
+    for (const query of searchQueries) {
+      try {
+        const encodedQuery = encodeURIComponent(query);
+        
+        // Create timeout controller for older browsers
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000);
+        
+        const response = await fetch(
+          `https://www.googleapis.com/customsearch/v1?key=${SEARCH_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${encodedQuery}&searchType=image&num=3&imgSize=large&imgType=photo&safe=active&fileType=jpg,png`,
+          { 
+            method: "GET",
+            signal: controller.signal
+          }
+        );
+        
+        clearTimeout(timeoutId);
+
+        if (response.ok) {
+          const data = await response.json();
+          
+          if (data.items && data.items.length > 0) {
+            // Try to find the best image (prefer recipe/food sites)
+            const preferredDomains = ['panlasangpinoy', 'kawalingpinoy', 'yummy', 'recipe', 'food', 'cook'];
+            
+            // First, try to find image from preferred domains
+            const preferredImage = data.items.find(item => 
+              preferredDomains.some(domain => item.link.toLowerCase().includes(domain))
+            );
+            
+            if (preferredImage) {
+              // Verify image loads before returning
+              if (await verifyImageLoads(preferredImage.link)) {
+                return preferredImage.link;
+              }
+            }
+            
+            // If no preferred image or it failed, try first result
+            for (const item of data.items) {
+              if (await verifyImageLoads(item.link)) {
+                return item.link;
+              }
+            }
+          }
+        }
+      } catch (err) {
+        // Continue to next query or fallback
+        console.warn(`Image search query failed: ${query}`, err);
+        continue;
+      }
+    }
+  }
+
+  // Fallback: Try Unsplash API (free, no key required for basic usage)
   try {
-    const query = encodeURIComponent(`"${dishName}" authentic filipino food recipe`);
-    const response = await fetch(
-      `https://www.googleapis.com/customsearch/v1?key=${SEARCH_API_KEY}&cx=${SEARCH_ENGINE_ID}&q=${query}&searchType=image&num=1&imgSize=large&imgType=photo&safe=active`,
-      { method: "GET" }
+    const unsplashQuery = encodeURIComponent(`${cleanDishName} filipino food`);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 3000);
+    
+    const unsplashResponse = await fetch(
+      `https://source.unsplash.com/800x600/?${unsplashQuery}`,
+      { 
+        method: "HEAD",
+        signal: controller.signal
+      }
     );
-
-    if (!response.ok) {
-      // If quota exceeded or error, return null so UI shows fallback icon
-      return null;
+    
+    clearTimeout(timeoutId);
+    
+    if (unsplashResponse.ok) {
+      // Unsplash returns redirect, get final URL
+      const finalUrl = unsplashResponse.url;
+      if (finalUrl && finalUrl.includes('unsplash.com')) {
+        return finalUrl;
+      }
     }
-
-    const data = await response.json();
-
-    if (data.items && data.items.length > 0) {
-      return data.items[0].link;
-    }
-
-    return null;
   } catch (err) {
-    console.error("Failed to search image:", err);
-    return null;
+    console.warn('Unsplash fallback failed:', err);
   }
+
+  // Final fallback: Use placeholder service
+  return null;
+};
+
+// Helper function to verify image loads (with timeout)
+const verifyImageLoads = (url) => {
+  return new Promise((resolve) => {
+    if (!url || !url.startsWith('http')) {
+      resolve(false);
+      return;
+    }
+
+    const img = new Image();
+    let resolved = false;
+
+    const timeout = setTimeout(() => {
+      if (!resolved) {
+        resolved = true;
+        img.onload = null;
+        img.onerror = null;
+        resolve(false);
+      }
+    }, 3000);
+
+    img.onload = () => {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeout);
+        resolve(true);
+      }
+    };
+
+    img.onerror = () => {
+      if (!resolved) {
+        resolved = true;
+        clearTimeout(timeout);
+        resolve(false);
+      }
+    };
+
+    // Set src after setting up handlers
+    img.src = url;
+  });
 };
 
 // --- INGREDIENT RECOGNITION (CAMERA) ---
@@ -151,14 +263,46 @@ export const fetchRecipeSuggestions = async ({ cart, pax, budget, isHealthyMode,
   const cleanJson = textResponse.replace(/```json|```/g, '').trim();
   const recipes = JSON.parse(cleanJson);
 
-  // 2. NEW: Fetch Images for ALL recipes in parallel
-  // This runs fetchDishImage for every recipe found
-  const recipesWithImages = await Promise.all(recipes.map(async (recipe) => {
-      // Search for the image
-      const imageUrl = await fetchDishImage(recipe.name);
-      // Return recipe with the new image link
-      return { ...recipe, image: imageUrl };
-  }));
+  // 2. NEW: Fetch Images for ALL recipes in parallel (with improved error handling)
+  // This runs fetchDishImage for every recipe found with retry logic
+  const recipesWithImages = await Promise.allSettled(
+    recipes.map(async (recipe) => {
+      try {
+        // Search for the image with improved function
+        let imageUrl = await fetchDishImage(recipe.name);
+        
+        // If first attempt fails, try with alternative name variations
+        if (!imageUrl && recipe.name) {
+          // Try with common Filipino dish name variations
+          const variations = [
+            recipe.name + ' filipino',
+            recipe.name + ' recipe',
+            recipe.name.replace(/^Adobo/i, 'Chicken Adobo'),
+            recipe.name.replace(/^Sinigang/i, 'Sinigang na Baboy'),
+            recipe.name.replace(/^Kare/i, 'Kare-Kare')
+          ];
+          
+          for (const variation of variations) {
+            if (variation !== recipe.name) {
+              imageUrl = await fetchDishImage(variation);
+              if (imageUrl) break;
+            }
+          }
+        }
+        
+        return { ...recipe, image: imageUrl };
+      } catch (err) {
+        console.warn(`Failed to fetch image for ${recipe.name}:`, err);
+        return { ...recipe, image: null };
+      }
+    })
+  ).then(results => 
+    results.map((result, index) => 
+      result.status === 'fulfilled' 
+        ? result.value 
+        : { ...recipes[index], image: null }
+    )
+  );
 
   // 3. Process matches and Return
   return recipesWithImages.map(recipe => {
