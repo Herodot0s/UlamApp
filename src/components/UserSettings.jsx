@@ -3,6 +3,7 @@ import {
   User, Mail, Globe, Leaf, Users, Save, 
   ArrowLeft, Shield, Trash2, Check, AlertCircle 
 } from 'lucide-react';
+import { supabase, TABLES } from '../services/supabase';
 
 const UserSettings = ({ 
   user, 
@@ -23,27 +24,53 @@ const UserSettings = ({
   
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
 
   // Sync local state if props change (optional safety)
   useEffect(() => {
-    if (user) setFormData({ name: user.name, email: user.email });
+    if (user) setFormData({ name: user.name || '', email: user.email || '' });
   }, [user]);
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     setIsSaving(true);
+    setErrorMsg('');
+    setSuccessMsg('');
 
-    // Simulate API delay
-    setTimeout(() => {
+    try {
+      if (!user?.id) {
+        throw new Error('User not logged in');
+      }
+
+      // Update user profile in Supabase
+      const { error: updateError } = await supabase
+        .from(TABLES.USER_PROFILES)
+        .update({
+          name: formData.name,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', user.id);
+
+      if (updateError) {
+        throw updateError;
+      }
+
       // Update global user state
-      setUser({ ...user, name: formData.name, email: formData.email });
+      setUser({ ...user, name: formData.name });
       
-      setIsSaving(false);
       setSuccessMsg(language === 'ph' ? 'Nai-save na ang settings!' : 'Settings saved successfully!');
       
       // Clear success message after 3s
       setTimeout(() => setSuccessMsg(''), 3000);
-    }, 800);
+    } catch (err) {
+      console.error('Error saving settings:', err);
+      setErrorMsg(language === 'ph' 
+        ? 'Hindi ma-save ang settings. Subukan ulit.' 
+        : 'Failed to save settings. Please try again.');
+      setTimeout(() => setErrorMsg(''), 5000);
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   return (
@@ -77,6 +104,12 @@ const UserSettings = ({
         </div>
       )}
 
+      {errorMsg && (
+        <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl flex items-center gap-2 text-sm font-bold animate-in fade-in">
+          <AlertCircle className="w-4 h-4" /> {errorMsg}
+        </div>
+      )}
+
       <form onSubmit={handleSave} className="space-y-8">
         
         {/* SECTION 1: Profile Information */}
@@ -105,7 +138,7 @@ const UserSettings = ({
                   <Mail className="absolute left-4 top-3.5 w-5 h-5 text-slate-400" />
                   <input 
                     type="email" 
-                    value={formData.email}
+                    value={formData.email || user?.email || ''}
                     disabled
                     className="w-full pl-12 pr-4 py-3 bg-slate-100 border border-slate-200 rounded-xl outline-none text-slate-400 cursor-not-allowed"
                   />
@@ -179,9 +212,9 @@ const UserSettings = ({
                    </div>
                 </div>
                 <div className="flex items-center bg-slate-50 border border-slate-200 rounded-lg overflow-hidden">
-                   <button type="button" onClick={() => setPax(Math.max(1, pax - 1))} className="px-3 py-1 hover:bg-slate-200 text-slate-500">-</button>
-                   <span className="text-sm font-bold w-6 text-center">{pax}</span>
-                   <button type="button" onClick={() =>Kpax + 1} className="px-3 py-1 hover:bg-slate-200 text-slate-500">+</button>
+                   <button type="button" onClick={() => setPax(Math.max(1, pax - 1))} className="px-3 py-1 hover:bg-slate-200 text-slate-500 transition-colors">-</button>
+                   <span className="text-sm font-bold w-8 text-center">{pax}</span>
+                   <button type="button" onClick={() => setPax(pax + 1)} className="px-3 py-1 hover:bg-slate-200 text-slate-500 transition-colors">+</button>
                 </div>
              </div>
 
@@ -195,11 +228,44 @@ const UserSettings = ({
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
-                <p className="font-bold text-red-900 text-sm">Delete Account</p>
-                <p className="text-xs text-red-700/60">Permanently remove data</p>
+                <p className="font-bold text-red-900 text-sm">
+                  {language === 'ph' ? 'Tanggalin ang Account' : 'Delete Account'}
+                </p>
+                <p className="text-xs text-red-700/60">
+                  {language === 'ph' ? 'Permanenteng tanggalin ang data' : 'Permanently remove data'}
+                </p>
               </div>
             </div>
-            <button type="button" className="p-2 hover:bg-red-100 rounded-lg text-red-600 transition-colors">
+            <button 
+              type="button" 
+              onClick={async () => {
+                const confirmMsg = language === 'ph' 
+                  ? 'Sigurado ka ba? Matatanggal ang lahat ng iyong data.'
+                  : 'Are you sure? This will permanently delete all your data.';
+                
+                if (window.confirm(confirmMsg)) {
+                  try {
+                    // Delete user data from Supabase
+                    const { error } = await supabase
+                      .from(TABLES.USER_PROFILES)
+                      .delete()
+                      .eq('id', user.id);
+
+                    if (error) throw error;
+
+                    // Sign out and redirect
+                    await supabase.auth.signOut();
+                    setView('login');
+                  } catch (err) {
+                    console.error('Error deleting account:', err);
+                    alert(language === 'ph' 
+                      ? 'Hindi ma-delete ang account. Subukan ulit.'
+                      : 'Failed to delete account. Please try again.');
+                  }
+                }
+              }}
+              className="p-2 hover:bg-red-100 rounded-lg text-red-600 transition-colors"
+            >
               <Trash2 className="w-5 h-5" />
             </button>
         </div>

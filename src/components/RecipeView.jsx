@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Camera, ChefHat, Heart, Activity, CheckCircle2, Circle, Utensils, Coins, Copy, Check } from 'lucide-react';
+import { ArrowLeft, Camera, ChefHat, Heart, Activity, CheckCircle2, Circle, Utensils, Coins, Copy, Check, Mail, AlertCircle } from 'lucide-react';
 import TextRenderer from './TextRenderer';
 
 const RecipeView = ({
@@ -14,7 +14,9 @@ const RecipeView = ({
   handleSaveRecipe,
   savedRecipes,
   language,
-  pax
+  pax,
+  user,
+  resendConfirmationEmail
 }) => {
   
   // State for the copy feedback animation
@@ -113,13 +115,50 @@ const RecipeView = ({
               </div>
             )}
 
+            {/* Email Confirmation Banner */}
+            {user && user.emailConfirmed === false && (
+              <div className="mt-4 mb-2 p-4 bg-yellow-50 border border-yellow-200 rounded-2xl">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-yellow-600 shrink-0 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-yellow-900 mb-1">
+                      {language === 'ph' ? 'Kailangan i-confirm ang email' : 'Email Confirmation Required'}
+                    </p>
+                    <p className="text-xs text-yellow-700 mb-3">
+                      {language === 'ph' 
+                        ? 'Kailangan mong i-confirm ang iyong email address bago makapag-save ng recipes. Tingnan ang iyong inbox para sa confirmation email.'
+                        : 'Please confirm your email address before saving recipes. Check your inbox for the confirmation email.'}
+                    </p>
+                    {resendConfirmationEmail && (
+                      <button
+                        onClick={async () => {
+                          const result = await resendConfirmationEmail();
+                          if (result?.success) {
+                            alert(language === 'ph' 
+                              ? 'Na-send na ang confirmation email! Tingnan ang iyong inbox.'
+                              : 'Confirmation email sent! Please check your inbox.');
+                          }
+                        }}
+                        className="text-xs font-bold text-yellow-700 hover:text-yellow-900 underline flex items-center gap-1"
+                      >
+                        <Mail className="w-3 h-3" />
+                        {language === 'ph' ? 'I-resend ang email' : 'Resend Confirmation Email'}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="flex justify-center">
               <button 
                 onClick={handleSaveRecipe}
-                disabled={!recipeDetails}
+                disabled={!recipeDetails || (user && user.emailConfirmed === false)}
                 className={`mt-2 inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all ${
                   savedRecipes.some(r => r.id === selectedRecipe.id)
                     ? 'bg-red-50 text-red-500 border border-red-100'
+                    : user && user.emailConfirmed === false
+                    ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed opacity-60'
                     : 'bg-slate-100 text-slate-500 hover:bg-slate-200'
                 }`}
               >
