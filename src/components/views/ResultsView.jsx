@@ -68,13 +68,21 @@ const ResultsView = ({
                     src={recipe.image} 
                     alt={recipe.name} 
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" 
+                    onError={(e) => {
+                      // If image fails to load, hide it and show fallback
+                      e.target.style.display = 'none';
+                      const fallback = e.target.nextElementSibling;
+                      if (fallback) fallback.style.display = 'flex';
+                    }}
                   />
-                ) : (
-                  /* Fallback if no image */
-                  <div className={`w-full h-full flex items-center justify-center ${isHealthyMode ? 'bg-green-50' : 'bg-orange-50'}`}>
-                    <Utensils className={`w-8 h-8 ${isHealthyMode ? 'text-green-300' : 'text-orange-300'}`} />
-                  </div>
-                )}
+                ) : null}
+                {/* Fallback if no image or image fails to load */}
+                <div 
+                  className={`w-full h-full flex items-center justify-center ${isHealthyMode ? 'bg-green-50' : 'bg-orange-50'}`}
+                  style={{ display: recipe.image ? 'none' : 'flex' }}
+                >
+                  <Utensils className={`w-8 h-8 ${isHealthyMode ? 'text-green-300' : 'text-orange-300'}`} />
+                </div>
 
                 {/* Cost Badge */}
                 {recipe.estimatedCost && (
